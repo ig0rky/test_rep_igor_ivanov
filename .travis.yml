@@ -1,0 +1,33 @@
+language: node_js
+
+node_js:
+- '6'
+
+addons:
+  apt:
+    sources:
+    - heroku
+    packages:
+    - heroku-toolbelt
+        
+install:
+- npm install
+
+script: true
+
+before_deploy:
+- cat .netrc >> $HOME/.netrc
+- chmod 0600 /home/travis/.netrc
+- heroku apps
+- heroku apps | grep -q goodone-$TRAVIS_BRANCH || heroku apps:create goodone-$TRAVIS_BRANCH
+- heroku git:remote -a goodone-$TRAVIS_BRANCH
+
+deploy:
+  provider: heroku
+  api_key: 60bb0cd3-1a57-4ea5-991b-f69fc60874a2
+  app: goodone-$TRAVIS_BRANCH
+  on: $TRAVIS_BRANCH
+
+after_deploy:
+- ./node_modules/.bin/wdio wdio.conf || travis_terminate 1
+Contact GitHub 
